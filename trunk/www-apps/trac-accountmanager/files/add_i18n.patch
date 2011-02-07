@@ -1,0 +1,776 @@
+# HG changeset patch
+# Parent 337dd3526636d416ec17f96335dac6f1ad2cbf41
+AccountManagerPlugin: Add basic i18n setup and message markup.
+
+diff --git a/accountmanagerplugin/trunk/acct_mgr/admin.py b/accountmanagerplugin/trunk/acct_mgr/admin.py
+--- acct_mgr/admin.py
++++ acct_mgr/admin.py
+@@ -19,7 +19,7 @@
+ from trac.admin import IAdminPanelProvider
+ from trac.util.compat import sorted
+ 
+-from acct_mgr.api import AccountManager
++from acct_mgr.api import AccountManager, _, tag_ 
+ from acct_mgr.web_ui import _create_user
+ 
+ def _getoptions(cls):
+@@ -68,8 +68,8 @@
+             self.d.setdefault(key, [])
+             self.d[key].append(value)
+         else:
+-            raise KeyError('Invalid key type (%s) for StoreOrder'
+-                           % str(type(key)))
++            raise KeyError(_("Invalid key type (%s) for StoreOrder")
++                             % str(type(key)))
+         pass
+ 
+     def get_enabled_stores(self):
+@@ -107,8 +107,8 @@
+     # IAdminPageProvider
+     def get_admin_panels(self, req):
+         if req.perm.has_permission('TRAC_ADMIN'):
+-            yield ('accounts', 'Accounts', 'config', 'Configuration')
+-            yield ('accounts', 'Accounts', 'users', 'Users')
++            yield ('accounts', _("Accounts"), 'config', _("Configuration"))
++            yield ('accounts', _("Accounts"), 'users', _("Users"))
+ 
+     def render_admin_panel(self, req, cat, page, path_info):
+         if page == 'config':
+@@ -190,8 +190,9 @@
+                         data['registration_error'] = e.message
+                         data['acctmgr'] = e.acctmgr
+                 else:
+-                    data['registration_error'] = 'The password store does ' \
+-                                                 'not support creating users'
++                    data['registration_error'] = _("""The password store
++                                                   does not support
++                                                   creating users""")
+             elif req.args.get('remove'):
+                 if delete_enabled:
+                     sel = req.args.get('sel')
+@@ -199,8 +200,8 @@
+                     for account in sel:
+                         self.account_manager.delete_user(account)
+                 else:
+-                    data['deletion_error'] = 'The password store does not ' \
+-                                             'support deleting users'
++                    data['deletion_error'] = _("""The password store does
++                                               not support deleting users""")
+             elif req.args.get('change'):
+                 if password_change_enabled:
+                     try:
+@@ -210,16 +211,16 @@
+                         error = TracError('')
+                         error.acctmgr = acctmgr
+                         if not user:
+-                            error.message = 'Username cannot be empty.'
++                            error.message = _("Username cannot be empty.")
+                             raise error
+ 
+                         password = req.args.get('change_password')
+                         if not password:
+-                            error.message = 'Password cannot be empty.'
++                            error.message = _("Password cannot be empty.")
+                             raise error
+ 
+                         if password != req.args.get('change_password_confirm'):
+-                            error.message = 'The passwords must match.'
++                            error.message = _("The passwords must match.")
+                             raise error
+ 
+                         self.account_manager.set_password(user, password)
+@@ -227,8 +228,9 @@
+                         data['password_change_error'] = e.message
+                         data['acctmgr'] = getattr(e, 'acctmgr', '')
+                 else:
+-                    data['password_change_error'] = 'The password store does not ' \
+-                                                    'support changing passwords'
++                    data['password_change_error'] = _("""The password store
++                                                      does not support
++                                                      changing passwords""")
+             
+ 
+         if listing_enabled:
+diff --git a/accountmanagerplugin/trunk/acct_mgr/api.py b/accountmanagerplugin/trunk/acct_mgr/api.py
+--- acct_mgr/api.py
++++ acct_mgr/api.py
+@@ -9,9 +9,20 @@
+ #
+ # Author: Matthew Good <trac@matt-good.net>
+ 
++from pkg_resources import resource_filename
++
+ from trac.core import *
+ from trac.config import Option, BoolOption, ExtensionOption, OrderedExtensionsOption
+ 
++try:
++    from  trac.util.translation  import  domain_functions
++    add_domain, _, tag_ = \
++        domain_functions('acct_mgr', ('add_domain', '_', 'tag_'))
++except:
++    # FIXME: 0.11 compatibility
++    pass
++
++
+ class IPasswordStore(Interface):
+     """An interface for Components that provide a storage method for users and
+     passwords.
+@@ -115,6 +126,11 @@
+                                      "and, next time he visits the site, he'll "
+                                      "be remembered")
+ 
++    def __init__(self):
++    # bind the 'acct_mgr' catalog to the specified locale directory
++        locale_dir = resource_filename(__name__, 'locale')
++        add_domain(self.env.path, locale_dir)
++
+     # Public API
+ 
+     def get_users(self):
+diff --git a/accountmanagerplugin/trunk/acct_mgr/notification.py b/accountmanagerplugin/trunk/acct_mgr/notification.py
+--- acct_mgr/notification.py
++++ acct_mgr/notification.py
+@@ -18,12 +18,11 @@
+ from trac.web.chrome import ITemplateProvider
+ from trac.notification import NotifyEmail, NotificationSystem
+ from trac.util.text import CRLF
+-from trac.util.translation import _
+ 
+ 
+ from pkg_resources import resource_filename
+ 
+-from api import IAccountChangeListener
++from acct_mgr.api import IAccountChangeListener, _
+ 
+ class AccountChangeListener(Component):
+     implements(IAccountChangeListener)
+@@ -53,8 +52,8 @@
+     def user_password_reset(self, username, email, password):
+         notifier = PasswordResetNotification(self.env)
+         if email != notifier.email_map.get(username):
+-            raise Exception('The email and username do not '
+-                            'match a known account.')
++            raise Exception(
++                _("The email and username do not match a known account."))
+         notifier.notify(username, password)
+ 
+     def user_email_verification_requested(self, username, token):
+@@ -241,7 +240,7 @@
+     # IAdminPageProvider
+     def get_admin_panels(self, req):
+         if req.perm.has_permission('TRAC_ADMIN'):
+-            yield ('accounts', 'Accounts', 'notification', 'Notification')
++            yield ('accounts', _("Accounts"), 'notification', _("Notification"))
+ 
+     def render_admin_panel(self, req, cat, page, path_info):
+         if page == 'notification':
+diff --git a/accountmanagerplugin/trunk/acct_mgr/pwhash.py b/accountmanagerplugin/trunk/acct_mgr/pwhash.py
+--- acct_mgr/pwhash.py
++++ acct_mgr/pwhash.py
+@@ -16,6 +16,7 @@
+ from trac.config import Option
+ 
+ from md5crypt import md5crypt
++from acct_mgr.api import _
+ from acct_mgr.util import urandom
+ 
+ class IPasswordHashMethod(Interface):
+@@ -83,8 +84,8 @@
+         return '{SHA}' + sha1(password).digest().encode('base64')[:-1]
+     elif crypt is None:
+         # crypt passwords are only supported on Unix-like systems
+-        raise NotImplementedError('The "crypt" module is unavailable '
+-                                  'on this platform.')
++        raise NotImplementedError(_("""The \"crypt\" module is unavailable
++                                    on this platform."""))
+     else:
+         return crypt(password, salt_)
+ 
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/admin_accountsconfig.html b/accountmanagerplugin/trunk/acct_mgr/templates/admin_accountsconfig.html
+--- acct_mgr/templates/admin_accountsconfig.html
++++ acct_mgr/templates/admin_accountsconfig.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+-      xmlns:py="http://genshi.edgewall.org/">
++      xmlns:py="http://genshi.edgewall.org/" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="admin.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Accounts: Configuration</title>
+   </head>
+@@ -47,7 +52,7 @@
+ 
+       <fieldset>
+         <legend>Persistent Sessions</legend>
+-        <label for="persistent_sessions">
++        <label for="persistent_sessions" i18n:msg="">
+           Allow the user to be remembered across sessions without needing to
+           re-authenticate?<br/>
+           This is, user checks a "Remember Me" <tt>checkbox</tt> and, next time
+@@ -61,7 +66,7 @@
+       </fieldset>
+ 
+       <div class="buttons">
+-        <input type="submit" name="save" value="Save" />
++        <input type="submit" name="save" value="${_('Save')}" />
+       </div>
+     </form>
+   </body>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/admin_accountsnotification.html b/accountmanagerplugin/trunk/acct_mgr/templates/admin_accountsnotification.html
+--- acct_mgr/templates/admin_accountsnotification.html
++++ acct_mgr/templates/admin_accountsnotification.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+-      xmlns:py="http://genshi.edgewall.org/">
++      xmlns:py="http://genshi.edgewall.org/" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="admin.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Accounts: Notification Configuration</title>
+   </head>
+@@ -18,8 +23,8 @@
+         account creation, password reset and account deletion.</p>
+ 
+       <h3>Notification Actions</h3>
+-        <p class="help">This is a list of actions which you can enable or
+-          disable by <em>checking</em> the <em>checkboxes</em>.</p>
++        <p class="help" i18n:msg="">This is a list of actions which you can
++          enable or disable by <em>checking</em> the <em>checkboxes</em>.</p>
+         <input type="checkbox" name="notify_actions" value="new"
+           checked="${'new' in notify_actions or None}">
+           Get notified of new account creation</input><br/>
+@@ -38,7 +43,7 @@
+                 name="notify_addresses">${ ' '.join(notify_addresses)}</textarea>
+     </fieldset>
+       <div class="buttons">
+-        <input type="submit" name="save" value="Save" />
++        <input type="submit" name="save" value="${_('Save')}" />
+       </div>
+     </form>
+   </body>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/admin_users.html b/accountmanagerplugin/trunk/acct_mgr/templates/admin_users.html
+--- acct_mgr/templates/admin_users.html
++++ acct_mgr/templates/admin_users.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+-      xmlns:py="http://genshi.edgewall.org/">
++      xmlns:py="http://genshi.edgewall.org/" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="admin.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Accounts</title>
+   </head>
+@@ -25,7 +30,7 @@
+           <label>Password: <input type="password" name="password" class="textwidget" /></label>
+         </div>
+         <div class="field">
+-          <label>Confirm password: <input type="password" name="password_confirm" class="textwidget" /></label>
++          <label>Confirm Password: <input type="password" name="password_confirm" class="textwidget" /></label>
+         </div>
+         <div class="field">
+           <label>Name: <input type="text" name="name" class="textwidget" value="${acctmgr.name}" /></label>
+@@ -35,7 +40,7 @@
+         </div>
+         <p class="help">Add a new user account.</p>
+         <div class="buttons">
+-          <input type="submit" name="add" value=" Add " />
++          <input type="submit" name="add" value="${_(' Add ')}" />
+         </div>
+       </fieldset>
+     </form>
+@@ -53,11 +58,11 @@
+           <label>Password: <input type="password" name="change_password" class="textwidget" /></label>
+         </div>
+         <div class="field">
+-          <label>Confirm password: <input type="password" name="change_password_confirm" class="textwidget" /></label>
++          <label>Confirm Password: <input type="password" name="change_password_confirm" class="textwidget" /></label>
+         </div>
+         <p class="help">Change a user's password.</p>
+         <div class="buttons">
+-          <input type="submit" name="change" value=" Change " />
++          <input type="submit" name="change" value="${_(' Change ')}" />
+         </div>
+       </fieldset>
+     </form>
+@@ -90,7 +95,7 @@
+         </tbody>
+       </table>
+       <div class="buttons" py:if="delete_enabled">
+-        <input type="submit" name="remove" value="Remove selected accounts" />
++        <input type="submit" name="remove" value="${_('Remove selected accounts')}" />
+       </div>
+     </form>
+     </py:choose>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/login.html b/accountmanagerplugin/trunk/acct_mgr/templates/login.html
+--- acct_mgr/templates/login.html
++++ acct_mgr/templates/login.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:py="http://genshi.edgewall.org/"
+-      xmlns:xi="http://www.w3.org/2001/XInclude">
++      xmlns:xi="http://www.w3.org/2001/XInclude" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="layout.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Login</title>
+     <script type="text/javascript">
+@@ -38,7 +43,7 @@
+           <input type="checkbox" id="rememberme" name="rememberme" value="1" />
+           <label for="rememberme">Remember me</label>
+         </div>
+-        <input type="submit" value="Login" />
++        <input type="submit" value="${_('Login')}" />
+ 
+         <p py:if="reset_password_enabled">
+           <a href="${href.reset_password()}">Forgot your password?</a>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/prefs_account.html b/accountmanagerplugin/trunk/acct_mgr/templates/prefs_account.html
+--- acct_mgr/templates/prefs_account.html
++++ acct_mgr/templates/prefs_account.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:py="http://genshi.edgewall.org/"
+-      xmlns:xi="http://www.w3.org/2001/XInclude">
++      xmlns:xi="http://www.w3.org/2001/XInclude" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="prefs.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+ 
+   <!--! FIXME [1] prevents this from matching its own output.
+         Should that really be necessary? -->
+@@ -20,7 +25,7 @@
+     </div>
+ 
+     <form method="post" action="" id="acctmgr_delete_account"
+-          onsubmit="return confirm('Are you sure you want to delete your account?');">
++          onsubmit="return confirm(_('Are you sure you want to delete your account?'));">
+       <div class="field">
+         <label>Password:
+           <input type="password" name="password" class="textwidget"
+@@ -29,7 +34,7 @@
+       </div>
+       <div class="buttons">
+         <input type="hidden" name="action" value="delete" />
+-        <input type="submit" value="Delete account" />
++        <input type="submit" value="${_('Delete account')}" />
+       </div>
+     </form>
+     </py:if>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/register.html b/accountmanagerplugin/trunk/acct_mgr/templates/register.html
+--- acct_mgr/templates/register.html
++++ acct_mgr/templates/register.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:py="http://genshi.edgewall.org/"
+-      xmlns:xi="http://www.w3.org/2001/XInclude">
++      xmlns:xi="http://www.w3.org/2001/XInclude" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="layout.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Register</title>
+     <script type="text/javascript">
+@@ -59,7 +64,7 @@
+             enable you to reset your password if you ever forget it.</p>
+           </div>
+         </fieldset>
+-        <input type="submit" value="Create account" />
++        <input type="submit" value="${_('Create account')}" />
+       </form>
+     </div>
+   </body>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/reset_password.html b/accountmanagerplugin/trunk/acct_mgr/templates/reset_password.html
+--- acct_mgr/templates/reset_password.html
++++ acct_mgr/templates/reset_password.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:py="http://genshi.edgewall.org/"
+-      xmlns:xi="http://www.w3.org/2001/XInclude">
++      xmlns:xi="http://www.w3.org/2001/XInclude"
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="layout.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Reset Password</title>
+     <script type="text/javascript">
+@@ -21,8 +26,8 @@
+       <py:choose>
+       <div class="system-message" py:when="reset.logged_in">
+         <h2>Already logged in</h2>
+-        <p>You're already logged in.  If you need to change your password
+-        please use the
++        <p i18n:msg="href">You're already logged in.  If you need to change
++        your password please use the
+         <a href="${href.prefs('account')}">Account Preferences</a> page.</p>
+       </div>
+ 
+@@ -51,7 +56,7 @@
+             <input type="text" name="email" class="textwidget" size="20" />
+           </label>
+         </div>
+-        <input type="submit" value="Reset password" />
++        <input type="submit" value="${_('Reset password')}" />
+       </form>
+       </py:otherwise>
+       </py:choose>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/templates/verify_email.html b/accountmanagerplugin/trunk/acct_mgr/templates/verify_email.html
+--- acct_mgr/templates/verify_email.html
++++ acct_mgr/templates/verify_email.html
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:py="http://genshi.edgewall.org/"
+-      xmlns:xi="http://www.w3.org/2001/XInclude">
++      xmlns:xi="http://www.w3.org/2001/XInclude" 
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="acct_mgr">
+   <xi:include href="layout.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Verify Email</title>
+     <script type="text/javascript">
+@@ -19,11 +24,11 @@
+ 
+       <h1>Verify Email</h1>
+       
+-      <p class="help">An email was sent to $req.session.email with a token to
+-      verify your new address.  Please check your email and enter the token
+-      in the form below.</p>
+-      <p>You can <a href="${href.prefs()}">change your email address</a> if it
+-      is incorrect.</p>
++      <p class="help" i18n:msg="email">An email was sent to
++      $req.session.email with a token to verify your new address.
++      Please check your email and enter the token in the form below.</p>
++      <p i18n:msg="href">You can <a href="${href.prefs()}">change your
++      email address</a> if it is incorrect.</p>
+ 
+       <form method="post" action="" id="acctmgr_verify_email">
+         <div>
+@@ -31,8 +36,8 @@
+           <input type="text" id="token" name="token" class="textwidget"
+                  size="10" value="${value_of('token')}" />
+         </div>
+-        <input type="submit" name="verify" value="Verify" />
+-        <input type="submit" name="resend" value="Resend Email" />
++        <input type="submit" name="verify" value="${_('Verify')}" />
++        <input type="submit" name="resend" value="${_('Resend Email')}" />
+       </form>
+ 
+     </div>
+diff --git a/accountmanagerplugin/trunk/acct_mgr/web_ui.py b/accountmanagerplugin/trunk/acct_mgr/web_ui.py
+--- acct_mgr/web_ui.py
++++ acct_mgr/web_ui.py
+@@ -27,7 +27,7 @@
+ from genshi.core import Markup
+ from genshi.builder import tag
+ 
+-from api import AccountManager
++from acct_mgr.api import AccountManager, _, tag_
+ from acct_mgr.util import urandom
+ 
+ def _create_user(req, env, check_permissions=True):
+@@ -43,11 +43,11 @@
+     error = TracError('')
+     error.acctmgr = acctmgr
+     if not user:
+-        error.message = 'Username cannot be empty.'
++        error.message = _("Username cannot be empty.")
+         raise error
+ 
+     if mgr.has_user(user):
+-        error.message = 'Another account with that name already exists.'
++        error.message = _("Another account with that name already exists.")
+         raise error
+ 
+     if check_permissions:
+@@ -55,16 +55,16 @@
+         permission_system = perm.PermissionSystem(env)
+         if permission_system.get_user_permissions(user) != \
+            permission_system.get_user_permissions('authenticated'):
+-            error.message = 'Another account with that name already exists.'
++            error.message = _("Another account with that name already exists.")
+             raise error
+ 
+     password = req.args.get('password')
+     if not password:
+-        error.message = 'Password cannot be empty.'
++        error.message = _("Password cannot be empty.")
+         raise error
+ 
+     if password != req.args.get('password_confirm'):
+-        error.message = 'The passwords must match.'
++        error.message = _("The passwords must match.")
+         raise error
+ 
+     mgr.set_password(user, password)
+@@ -133,7 +133,7 @@
+         if req.authname and req.authname != 'anonymous':
+             user_store = AccountManager(self.env).find_user_store(req.authname)
+             if user_store in writable:
+-                yield 'account', 'Account'
++                yield 'account', _("Account")
+ 
+     def render_preference_panel(self, req, panel):
+         data = {'account': self._do_account(req)}
+@@ -169,7 +169,7 @@
+             return
+         if req.authname == 'anonymous':
+             yield 'metanav', 'reset_password', tag.a(
+-                "Forgot your password?", href=req.href.reset_password())
++                _("Forgot your password?"), href=req.href.reset_password())
+ 
+     def reset_password_enabled(self):
+         return (self.env.is_component_enabled(AccountModule)
+@@ -190,7 +190,7 @@
+                 if force_change_password:
+                     del(req.session['force_change_passwd'])
+                     req.session.save()
+-                    chrome.add_notice(req, Markup(tag(
++                    chrome.add_notice(req, Markup(tag_(
+                         "Thank you for taking the time to update your password."
+                     )))
+                     force_change_password = False
+@@ -199,10 +199,10 @@
+             else:
+                 data.update({'error': 'Invalid action'})
+         if force_change_password:
+-            chrome.add_warning(req, Markup(tag(
++            chrome.add_warning(req, Markup(tag_(
+                 "You are required to change password because of a recent "
+                 "password change request. ",
+-                tag.b("Please change your password now."))))
++                tag.b(_("Please change your password now.")))))
+         return data
+ 
+     def _do_reset_password(self, req):
+@@ -213,9 +213,9 @@
+         username = req.args.get('username')
+         email = req.args.get('email')
+         if not username:
+-            return {'error': 'Username is required'}
++            return {'error': _("Username is required")}
+         if not email:
+-            return {'error': 'Email is required'}
++            return {'error': _("Email is required")}
+ 
+         new_password = self._random_password()
+         mgr = AccountManager(self.env)
+@@ -249,19 +249,19 @@
+ 
+         old_password = req.args.get('old_password')
+         if not old_password:
+-            return {'save_error': 'Old Password cannot be empty.'}
++            return {'save_error': _("Old Password cannot be empty.")}
+         if not mgr.check_password(user, old_password):
+-            return {'save_error': 'Old Password is incorrect.'}
++            return {'save_error': _("Old Password is incorrect.")}
+ 
+         password = req.args.get('password')
+         if not password:
+-            return {'save_error': 'Password cannot be empty.'}
++            return {'save_error': _("Password cannot be empty.")}
+ 
+         if password != req.args.get('password_confirm'):
+-            return {'save_error': 'The passwords must match.'}
++            return {'save_error': _("The passwords must match.")}
+ 
+         mgr.set_password(user, password)
+-        return {'message': 'Password successfully updated.'}
++        return {'message': _("Password successfully updated.")}
+ 
+     def _do_delete(self, req):
+         user = req.authname
+@@ -269,9 +269,9 @@
+ 
+         password = req.args.get('password')
+         if not password:
+-            return {'delete_error': 'Password cannot be empty.'}
++            return {'delete_error': _("Password cannot be empty.")}
+         if not mgr.check_password(user, password):
+-            return {'delete_error': 'Password is incorrect.'}
++            return {'delete_error': _("Password is incorrect.")}
+ 
+         mgr.delete_user(user)
+         req.redirect(req.href.logout())
+@@ -325,7 +325,7 @@
+         if not self._enable_check():
+             return
+         if req.authname == 'anonymous':
+-            yield 'metanav', 'register', tag.a("Register",
++            yield 'metanav', 'register', tag.a(_("Register"),
+                                                href=req.href.register())
+ 
+ 
+@@ -402,7 +402,7 @@
+                 'persistent_sessions': AccountManager(self.env).persistent_sessions
+             }
+             if req.method == 'POST':
+-                data['login_error'] = 'Invalid username or password'
++                data['login_error'] = _("Invalid username or password")
+             return 'login.html', data, None
+         return auth.LoginModule.process_request(self, req)
+ 
+@@ -544,10 +544,11 @@
+             return handler
+ #        req.perm = perm.PermissionCache(self.env, req.auth_nme)
+         if handler is not self and 'email_verification_token' in req.session and not req.perm.has_permission('TRAC_ADMIN'):
++            # TRANSLATOR: ... until you 'verify your email address'
+             chrome.add_warning(req, Markup(tag.span(
+-                    'Your permissions have been limited until you ',
+-                    tag.a(href=req.href.verify_email())(
+-                          'verify your email address'))))
++                _("Your permissions have been limited until you %(link)s"),
++                link = tag.a(_("verify your email address"),
++                             href=req.href.verify_email() ))))
+             req.perm = perm.PermissionCache(self.env, 'anonymous')
+         return handler
+ 
+@@ -569,11 +570,12 @@
+                 req.authname, 
+                 req.session['email_verification_token']
+             )
++            # TRANSLATOR: ... to 'verify your new email address'
+             chrome.add_notice(req, Markup(tag.span(
+-                    'An email has been sent to ', email,
+-                    ' with a token to ',
+-                    tag.a(href=req.href.verify_email())(
+-                        'verify your new email address'))))
++                _("An email has been sent to %(email)s with a token to ",
++                    email=email),
++                    tag.a(_("verify your new email address"),
++                          href=req.href.verify_email() ))))
+         return template, data, content_type
+ 
+     # IRequestHandler methods
+@@ -583,7 +585,7 @@
+ 
+     def process_request(self, req):
+         if 'email_verification_token' not in req.session:
+-            chrome.add_notice(req, 'Your email is already verified')
++            chrome.add_notice(req, _("Your email is already verified"))
+         elif req.method != 'POST':
+             pass
+         elif 'resend' in req.args:
+@@ -594,14 +596,14 @@
+                 req.session['email_verification_token']
+             )
+             chrome.add_notice(req,
+-                    'A notification email has been resent to %s.',
++                    _("A notification email has been resent to %s."),
+                     req.session.get('email'))
+         elif 'verify' in req.args:
+             if req.args['token'] == req.session['email_verification_token']:
+                 del req.session['email_verification_token']
+-                chrome.add_notice(req, 'Thank you for verifying your email address')
++                chrome.add_notice(req, _("Thank you for verifying your email address"))
+             else:
+-                chrome.add_warning(req, 'Invalid verification token')
++                chrome.add_warning(req, _("Invalid verification token"))
+         data = {}
+         if 'token' in req.args:
+             data['token'] = req.args['token']
+diff --git a/accountmanagerplugin/trunk/setup.cfg b/accountmanagerplugin/trunk/setup.cfg
+--- setup.cfg
++++ setup.cfg
+@@ -2,3 +2,24 @@
+ tag_build = dev
+ tag_svn_revision = true
+ 
++[extract_messages]
++add_comments = TRANSLATOR:
++msgid_bugs_address = hoff.st@shaas.net
++output_file = acct_mgr/locale/messages.pot
++#keywords = _ ngettext:1,2 N_ tag_
++keywords = _ # nothing else used by now
++width = 72
++
++[init_catalog]
++input_file = acct_mgr/locale/messages.pot
++output_dir = acct_mgr/locale
++domain = acct_mgr
++
++[compile_catalog]
++directory = acct_mgr/locale
++domain = acct_mgr
++
++[update_catalog]
++input_file = acct_mgr/locale/messages.pot
++output_dir = acct_mgr/locale
++domain = acct_mgr
+diff --git a/accountmanagerplugin/trunk/setup.py b/accountmanagerplugin/trunk/setup.py
+--- setup.py
++++ setup.py
+@@ -8,6 +8,21 @@
+ 
+ from setuptools import setup
+ 
++extra = {}
++
++from trac.util.dist  import  get_l10n_cmdclass
++cmdclass = get_l10n_cmdclass()
++if cmdclass:
++    extra['cmdclass'] = cmdclass
++    extractors = [
++        ('**.py',                'python', None),
++        ('**/templates/**.html', 'genshi', None),
++    ]
++    extra['message_extractors'] = {
++        'acct_mgr': extractors,
++    }
++
++
+ setup(
+     name = 'TracAccountManager',
+     version = '0.2.1',
+@@ -21,7 +36,8 @@
+     zip_safe=True,
+     packages=['acct_mgr'],
+     package_data={'acct_mgr': ['templates/*.html',
+-                               'templates/*.txt']},
++                               'templates/*.txt',
++                               'locale/*/LC_MESSAGES/*.mo']},
+ 
+     install_requires = [
+         #'trac>=0.11',
+@@ -42,4 +58,5 @@
+     },
+ 
+     test_suite = 'acct_mgr.tests.suite',
++    **extra
+ )

@@ -1,0 +1,503 @@
+Index: acct_mgr/locale/ru/LC_MESSAGES/acct_mgr.po
+===================================================================
+--- acct_mgr/locale/ru/LC_MESSAGES/acct_mgr.po	(revision 0)
++++ acct_mgr/locale/ru/LC_MESSAGES/acct_mgr.po	(revision 0)
+@@ -0,0 +1,498 @@
++# Russian translations for TracAccountManager.
++# Copyright (C) 2010 
++# This file is distributed under the same license as the 
++# TracAccountManager project.
++#
++# Dmitri Bogomolov <4glitch@gmail.com>, 2010.
++#
++#, fuzzy
++msgid ""
++msgstr ""
++"Project-Id-Version: TracAccountManager 0.2.1\n"
++"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
++"POT-Creation-Date: 2010-02-12 00:05+0200\n"
++"PO-Revision-Date: 2010-09-28 00:27+0300\n"
++"Last-Translator: Dmitri Bogomolov <4glitch@gmail.com>\n"
++"Language-Team: ru <LL@li.org>\n"
++"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=utf-8\n"
++"Content-Transfer-Encoding: 8bit\n"
++"Generated-By: Babel 0.9.4\n"
++
++#: acct_mgr/admin.py:71
++#, python-format, fuzzy
++msgid "Invalid key type (%s) for StoreOrder"
++msgstr "Недопустимый тип ключа (%s) для StoreOrder"
++
++#: acct_mgr/admin.py:110 acct_mgr/admin.py:111 acct_mgr/notification.py:243
++#: acct_mgr/templates/admin_users.html:14
++msgid "Accounts"
++msgstr "Учетные записи"
++
++#: acct_mgr/admin.py:110
++msgid "Configuration"
++msgstr "Настройки"
++
++#: acct_mgr/admin.py:111
++msgid "Users"
++msgstr "Пользователи"
++
++#: acct_mgr/admin.py:193
++msgid ""
++"The password store\n"
++"                                                   does not support\n"
++"                                                   creating users"
++msgstr ""
++"Хранилище паролей\n"
++"                                                    не поддерживает\n"
++"                                                    создание пользователей"
++
++#: acct_mgr/admin.py:203
++msgid ""
++"The password store does\n"
++"                                               not support deleting users"
++msgstr ""
++"Хранилище паролей\n"
++"                                не поддерживает удаление пользователей"
++
++#: acct_mgr/admin.py:214 acct_mgr/web_ui.py:46
++msgid "Username cannot be empty."
++msgstr "Имя пользователя не может быть пустым."
++
++#: acct_mgr/admin.py:219 acct_mgr/web_ui.py:63 acct_mgr/web_ui.py:258
++#: acct_mgr/web_ui.py:272
++msgid "Password cannot be empty."
++msgstr "Пароль не может быть пустым."
++
++#: acct_mgr/admin.py:223 acct_mgr/web_ui.py:67 acct_mgr/web_ui.py:261
++msgid "The passwords must match."
++msgstr "Пароли должны совпадать."
++
++#: acct_mgr/admin.py:231
++msgid ""
++"The password store\n"
++"                                                      does not support\n"
++"                                                      changing passwords"
++msgstr ""
++"Хранилище паролей\n"
++"                                                не поддерживает\n"
++"                                                изменение паролей"
++
++#: acct_mgr/notification.py:56
++msgid "The email and username do not match a known account."
++msgstr ""
++
++#: acct_mgr/notification.py:148
++msgid "Ticket contains non-ASCII chars. Please change encoding setting"
++msgstr "Билет содержит не-ASCII символы. Пожалуйста, проверьте настройки кодировки."
++
++#: acct_mgr/notification.py:243
++msgid "Notification"
++msgstr "Уведомление"
++
++#: acct_mgr/pwhash.py:87
++msgid ""
++"The \"crypt\" module is unavailable\n"
++"                                    on this platform."
++msgstr "Модуль \"crypt\" недоступен для этой платформы."
++
++#: acct_mgr/web_ui.py:50 acct_mgr/web_ui.py:58
++msgid "Another account with that name already exists."
++msgstr "Уже есть пользователь с таким именем."
++
++#: acct_mgr/web_ui.py:136 acct_mgr/templates/admin_users.html:82
++#: acct_mgr/templates/prefs_account.html:44
++msgid "Account"
++msgstr "Учетная запись"
++
++#: acct_mgr/web_ui.py:172 acct_mgr/templates/login.html:49
++msgid "Forgot your password?"
++msgstr "Забыли пароль?"
++
++#: acct_mgr/web_ui.py:205
++msgid "Please change your password now."
++msgstr "Теперь, пожалуйста, смените пароль."
++
++#: acct_mgr/web_ui.py:216
++msgid "Username is required"
++msgstr "Требуется имя пользователя"
++
++#: acct_mgr/web_ui.py:218
++msgid "Email is required"
++msgstr "Требуется Email"
++
++#: acct_mgr/web_ui.py:252
++msgid "Old Password cannot be empty."
++msgstr "Старый пароль не может быть пустым."
++
++#: acct_mgr/web_ui.py:254
++msgid "Old Password is incorrect."
++msgstr "Неправильный старый пароль."
++
++#: acct_mgr/web_ui.py:264
++msgid "Password successfully updated."
++msgstr "Пароль удачно изменен."
++
++#: acct_mgr/web_ui.py:274
++msgid "Password is incorrect."
++msgstr "Неправильный пароль."
++
++#: acct_mgr/web_ui.py:328 acct_mgr/templates/register.html:14
++#, fuzzy
++msgid "Register"
++msgstr "Регистрация"
++
++#: acct_mgr/web_ui.py:405
++msgid "Invalid username or password"
++msgstr "Неправильное имя или пароль"
++
++#: acct_mgr/web_ui.py:549
++#, python-format
++msgid "Your permissions have been limited until you %(link)s"
++msgstr "Ваши разрешения ограничены до тех пор, пока вы не %(link)s"
++
++#: acct_mgr/web_ui.py:550
++#, fuzzy
++msgid "verify your email address"
++msgstr "проверьте свой электронный адрес"
++
++#. TRANSLATOR: ... to 'verify your new email address'
++#: acct_mgr/web_ui.py:575
++#, python-format
++msgid "An email has been sent to %(email)s with a token to "
++msgstr "На адрес %(email)s выслано письмо со словом для "
++
++#: acct_mgr/web_ui.py:577
++msgid "verify your new email address"
++msgstr "проверки вашего нового электронного адреса"
++
++#: acct_mgr/web_ui.py:588
++msgid "Your email is already verified"
++msgstr "Ваш адрес уже проверен"
++
++#: acct_mgr/web_ui.py:599
++#, python-format
++msgid "A notification email has been resent to %s."
++msgstr "Уведомление повторно отправлено  %s."
++
++#: acct_mgr/web_ui.py:604
++msgid "Thank you for verifying your email address"
++msgstr "Спасибо за проверку электронного адреса"
++
++#: acct_mgr/web_ui.py:606
++msgid "Invalid verification token"
++msgstr "Неправильное проверочное слово"
++
++#: acct_mgr/templates/admin_accountsconfig.html:14
++#: acct_mgr/templates/admin_accountsconfig.html:18
++msgid "Accounts: Configuration"
++msgstr "Учетные записи: настройки"
++
++#: acct_mgr/templates/admin_accountsconfig.html:43
++msgid "Password Reset"
++msgstr "Сброс пароля"
++
++#: acct_mgr/templates/admin_accountsconfig.html:44
++msgid "Force users to change passwords after a password reset?"
++msgstr "Заставить пользователей менять пароль после его сброса?"
++
++#: acct_mgr/templates/admin_accountsconfig.html:48
++#: acct_mgr/templates/admin_accountsconfig.html:63
++msgid "Yes"
++msgstr "Да"
++
++#: acct_mgr/templates/admin_accountsconfig.html:50
++#: acct_mgr/templates/admin_accountsconfig.html:65
++msgid "No"
++msgstr "Нет"
++
++#: acct_mgr/templates/admin_accountsconfig.html:54
++msgid "Persistent Sessions"
++msgstr "Хранимые сеансы"
++
++#: acct_mgr/templates/admin_accountsconfig.html:55
++msgid ""
++"Allow the user to be remembered across sessions without needing to\n"
++"          re-authenticate?[1:]\n"
++"          This is, user checks a \"Remember Me\" [2:checkbox] and, next "
++"time\n"
++"          he visits the site,[3:]\n"
++"          he'll be remembered and automatically authenticated."
++msgstr ""
++"Разрешить запоминать пользователей между посещениями и осуществлять вход\n"
++"          без повторной аутентификации?[1:]\n"
++"          Пользователь ставит [2:флажок] \"Запомнить меня\", и в следующий раз,\n"
++"          когда он открывает сайт,[3:]\n"
++"          его сеанс будет возобновлен автоматически."
++
++#: acct_mgr/templates/admin_accountsconfig.html:69
++#: acct_mgr/templates/admin_accountsnotification.html:46
++msgid "Save"
++msgstr "Сохранить"
++
++#: acct_mgr/templates/admin_accountsnotification.html:14
++#: acct_mgr/templates/admin_accountsnotification.html:18
++msgid "Accounts: Notification Configuration"
++msgstr "Учетные записи: настройки уведомлений"
++
++#: acct_mgr/templates/admin_accountsnotification.html:21
++#, fuzzy
++msgid "Account Notification"
++msgstr "Уведомления"
++
++#: acct_mgr/templates/admin_accountsnotification.html:22
++#, fuzzy
++msgid ""
++"Set the following options in order to be notified of\n"
++"        account creation, password reset and account deletion."
++msgstr ""
++"Выберите из следующих пунктов, чтобы получать уведомления о\n"
++"         создании пользователей, сбросе пароля и удалении пользователей."
++
++#: acct_mgr/templates/admin_accountsnotification.html:25
++#, fuzzy
++msgid "Notification Actions"
++msgstr "Варианты уведомлений"
++
++#: acct_mgr/templates/admin_accountsnotification.html:26
++#, fuzzy
++msgid ""
++"This is a list of actions which you can\n"
++"          enable or disable by [1:checking] the [2:checkboxes]."
++msgstr ""
++"Здесь перечень действий, которые вы можете\n"
++"               включить или выключить, [1:установкой] [2:флажков]."
++
++#: acct_mgr/templates/admin_accountsnotification.html:29
++msgid "Get notified of new account creation"
++msgstr "Уведомлять о создании новых пользователей"
++
++#: acct_mgr/templates/admin_accountsnotification.html:32
++msgid "Get notified of password reset"
++msgstr "Уведомлять о сбросе паролей"
++
++#: acct_mgr/templates/admin_accountsnotification.html:35
++msgid "Get notified of account deletion"
++msgstr "Уведомлять об удалении учетных записей"
++
++#: acct_mgr/templates/admin_accountsnotification.html:38
++msgid "Notification Recipient Addresses"
++msgstr "Адреса получателей уведомлений"
++
++#: acct_mgr/templates/admin_accountsnotification.html:39
++#, fuzzy
++msgid ""
++"These are the email addresses that get notified of the \n"
++"        above actions."
++msgstr "Уведомление о выполненных действиях отправлено на следующие адреса."
++
++#: acct_mgr/templates/admin_users.html:18
++msgid "Manage User Accounts"
++msgstr "Управление пользователями"
++
++#: acct_mgr/templates/admin_users.html:25
++msgid "Add Account:"
++msgstr "Добавить пользователя:"
++
++#: acct_mgr/templates/admin_users.html:27
++#: acct_mgr/templates/admin_users.html:55 acct_mgr/templates/login.html:35
++#: acct_mgr/templates/register.html:36
++#: acct_mgr/templates/reset_password.html:50
++msgid "Username:"
++msgstr "Имя пользователя:"
++
++#: acct_mgr/templates/admin_users.html:30
++#: acct_mgr/templates/admin_users.html:58 acct_mgr/templates/login.html:39
++#: acct_mgr/templates/prefs_account.html:30 acct_mgr/templates/register.html:41
++msgid "Password:"
++msgstr "Пароль:"
++
++#: acct_mgr/templates/admin_users.html:33
++#: acct_mgr/templates/admin_users.html:61
++#: acct_mgr/templates/prefs_account.html:73 acct_mgr/templates/register.html:46
++msgid "Confirm Password:"
++msgstr "Подтверждение пароля:"
++
++#: acct_mgr/templates/admin_users.html:36 acct_mgr/templates/register.html:55
++msgid "Name:"
++msgstr "Имя:"
++
++#: acct_mgr/templates/admin_users.html:39 acct_mgr/templates/register.html:60
++msgid "Email:"
++msgstr "Адрес:"
++
++#: acct_mgr/templates/admin_users.html:41
++msgid "Add a new user account."
++msgstr "Добавить нового пользователя."
++
++#: acct_mgr/templates/admin_users.html:43
++msgid " Add "
++msgstr " Добавить "
++
++#: acct_mgr/templates/admin_users.html:53
++msgid "Change Password:"
++msgstr "Изменить пароль:"
++
++#: acct_mgr/templates/admin_users.html:63
++msgid "Change a user's password."
++msgstr "Изменить пароль пользователя."
++
++#: acct_mgr/templates/admin_users.html:65
++msgid " Change "
++msgstr " Изменить "
++
++#: acct_mgr/templates/admin_users.html:73
++msgid "This password store does not support listing users"
++msgstr "Используемое хранилище паролей не поддерживает перечисление пользователей"
++
++#: acct_mgr/templates/admin_users.html:82
++msgid "Name"
++msgstr "Имя"
++
++#: acct_mgr/templates/admin_users.html:82
++msgid "Email"
++msgstr "Адрес"
++
++#: acct_mgr/templates/admin_users.html:82
++msgid "Last Login"
++msgstr "Последний вход"
++
++#: acct_mgr/templates/admin_users.html:98
++msgid "Remove selected accounts"
++msgstr "Удалить выбранных"
++
++#: acct_mgr/templates/login.html:14 acct_mgr/templates/login.html:25
++#: acct_mgr/templates/login.html:46
++msgid "Login"
++msgstr "Вход"
++
++#: acct_mgr/templates/login.html:28 acct_mgr/templates/prefs_account.html:23
++#: acct_mgr/templates/prefs_account.html:49
++#: acct_mgr/templates/prefs_account.html:56 acct_mgr/templates/register.html:27
++#: acct_mgr/templates/reset_password.html:42
++msgid "Error"
++msgstr "Ошибка"
++
++#: acct_mgr/templates/login.html:44
++msgid "Remember me"
++msgstr "Запомнить меня"
++
++#: acct_mgr/templates/prefs_account.html:20
++msgid "Delete Account"
++msgstr "Удалить учетную запись"
++
++#: acct_mgr/templates/prefs_account.html:37
++msgid "Delete account"
++msgstr "Удалить учетную запись"
++
++#: acct_mgr/templates/prefs_account.html:53
++msgid "Change Password"
++msgstr "Изменить пароль"
++
++#: acct_mgr/templates/prefs_account.html:61
++msgid "Old Password:"
++msgstr "Старый пароль:"
++
++#: acct_mgr/templates/prefs_account.html:67
++msgid "New Password:"
++msgstr "Новый пароль:"
++
++#: acct_mgr/templates/register.html:24
++#, fuzzy
++msgid "Register an account"
++msgstr "Зарегистрировать учетную запись"
++
++#: acct_mgr/templates/register.html:33
++msgid "Required"
++msgstr "Обязательно"
++
++#: acct_mgr/templates/register.html:53
++msgid "Optional"
++msgstr "На выбор"
++
++#: acct_mgr/templates/register.html:63
++msgid ""
++"Entering your email address will\n"
++"            enable you to reset your password if you ever forget it."
++msgstr ""
++"Ввод почтового адреса позволит\n"
++"               осуществить сброс пароля, если вы когда-нибудь его забудете."
++
++#: acct_mgr/templates/register.html:67
++msgid "Create account"
++msgstr "Создать учетную запись"
++
++#: acct_mgr/templates/reset_password.html:14
++#: acct_mgr/templates/reset_password.html:24
++msgid "Reset Password"
++msgstr "Сбросить пароль"
++
++#: acct_mgr/templates/reset_password.html:28
++#, fuzzy
++msgid "Already logged in"
++msgstr "Вы уже вошли"
++
++#: acct_mgr/templates/reset_password.html:29
++msgid ""
++"You're already logged in.  If you need to change\n"
++"        your password please use the\n"
++"        [1:Account Preferences] page."
++msgstr ""
++"Вы уже вошли. Если вам нужно сменить\n"
++"       пароль, используйте\n"
++"       страницу [1:Предпочтения]."
++
++#: acct_mgr/templates/reset_password.html:34
++#, fuzzy
++msgid "A new password has been emailed to you at"
++msgstr "Новый пароль отправлен на ваш адрес"
++
++#: acct_mgr/templates/reset_password.html:38
++msgid ""
++"If you've forgot your password enter your username and\n"
++"      email address below and you'll be emailed a new password."
++msgstr ""
++"Если вы забыли пароль, введите ваше имя пользователя и\n"
++"     почтовый адрес ниже, и вам будет выслан новый пароль."
++
++#: acct_mgr/templates/reset_password.html:55
++msgid "Email Address:"
++msgstr "Почтовый адрес:"
++
++#: acct_mgr/templates/reset_password.html:59
++msgid "Reset password"
++msgstr "Сброс пароля"
++
++#: acct_mgr/templates/verify_email.html:14
++#: acct_mgr/templates/verify_email.html:25
++msgid "Verify Email"
++msgstr "Подтверждения адреса"
++
++#: acct_mgr/templates/verify_email.html:27
++#, python-format
++msgid ""
++"An email was sent to\n"
++"      %(email)s with a token to verify your new address.\n"
++"      Please check your email and enter the token in the form below."
++msgstr "На адрес %(email)s отправлено письмо с кодовым словом, для проверки его правильности. Пожалуйста, проверьте электронную почту и введите полученное слово в следующее поле."
++
++#: acct_mgr/templates/verify_email.html:30
++msgid ""
++"You can [1:change your\n"
++"      email address] if it is incorrect."
++msgstr "Вы можете [1:Изменить свой адрес], если он неправильный."
++
++#: acct_mgr/templates/verify_email.html:35
++msgid "Verification Token:"
++msgstr "Проверочное слово:"
++
++#: acct_mgr/templates/verify_email.html:39
++msgid "Verify"
++msgstr "Проверить"
++
++#: acct_mgr/templates/verify_email.html:40
++#, fuzzy
++msgid "Resend Email"
++msgstr "Послать снова"
++
