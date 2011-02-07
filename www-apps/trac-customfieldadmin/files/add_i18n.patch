@@ -1,0 +1,218 @@
+Index: customfieldadmin/api.py
+===================================================================
+--- customfieldadmin/api.py	(revision 9160)
++++ customfieldadmin/api.py	(working copy)
+@@ -10,9 +10,24 @@
+ 
+ import re
+ 
++from pkg_resources import resource_filename
++
+ from trac.core import *
+ from trac.ticket.model import TicketSystem
+ 
++try:
++    from  trac.util.translation  import  domain_functions
++    add_domain, _, tag_ = \
++        domain_functions('customfieldadmin', ('add_domain', '_', 'tag_'))
++except:
++    # fall back to 0.11 behavior, i18n functions are no-ops then
++    def add_domain():
++        pass
++
++    _ = N_ = tag_ = _noop = lambda string: string
++    pass
++
++
+ __all__ = ['CustomFields']
+ 
+ class CustomFields(Component):
+@@ -53,21 +68,21 @@
+         # Name, Type and Label is required
+         if not (customfield.get('name') and customfield.get('type') \
+                 and customfield.get('label')):
+-            raise TracError("Custom field needs at least a name, type and label.")
++            raise TracError(_("Custom field needs at least a name, type and label."))
+         # Use lowercase custom fieldnames only
+         customfield['name'] = customfield['name'].lower()
+         # Only alphanumeric characters (and [-_]) allowed for custom fieldname
+         if re.search('^[a-z0-9-_]+$', customfield['name']) == None:
+-           raise TracError("Only alphanumeric characters allowed for custom field name (a-z or 0-9 or -_).")
++           raise TracError(_("Only alphanumeric characters allowed for custom field name (a-z or 0-9 or -_)."))
+         # Name must begin with a character - anything else not supported by Trac
+         if not customfield['name'][0].isalpha():
+-            raise TracError("Custom field name must begin with a character (a-z).")
++            raise TracError(_("Custom field name must begin with a character (a-z)."))
+         # Check that it is a valid field type
+         if not customfield['type'] in ['text', 'checkbox', 'select', 'radio', 'textarea']:
+-            raise TracError("%s is not a valid field type" % customfield['type'])
++            raise TracError(_("%s is not a valid field type") % customfield['type'])
+         # Check that field does not already exist (if modify it should already be deleted)
+         if create and self.config.get('ticket-custom', customfield['name']):
+-            raise TracError("Can not create as field already exists.")
++            raise TracError(_("Can not create as field already exists."))
+     
+     def create_custom_field(self, customfield):
+         """ Create the new custom fields (that may just have been deleted as part
+@@ -130,3 +145,9 @@
+         # Persist permanent deletes
+         if not modify:
+             self.config.save()
++
++    def __init__(self):
++        # bind the 'customfieldadmin' catalog to the specified locale directory
++        locale_dir = resource_filename(__name__, 'locale')
++        add_domain(self.env.path, locale_dir)
++        
+Index: customfieldadmin/templates/customfieldadmin.html
+===================================================================
+--- customfieldadmin/templates/customfieldadmin.html	(revision 9160)
++++ customfieldadmin/templates/customfieldadmin.html	(working copy)
+@@ -3,8 +3,13 @@
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+-      xmlns:py="http://genshi.edgewall.org/">
++      xmlns:py="http://genshi.edgewall.org/"
++      xmlns:i18n="http://genshi.edgewall.org/i18n"
++      i18n:domain="customfieldadmin">
+   <xi:include href="admin.html" />
++  <?python
++    from acct_mgr.api import _
++  ?>
+   <head>
+     <title>Custom Fields Admin</title>
+   </head>
+@@ -66,8 +71,8 @@
+             Rows: <input type="text" size="5" name="rows" id="rows" value="${cfadmin.customfield.height}" /></label>
+         </div>
+         <div class="buttons">
+-          <input type="submit" name="cancel" value="Cancel" />
+-          <input type="submit" name="save" value="Save" />
++          <input type="submit" name="cancel" value="${_('Cancel')}" />
++          <input type="submit" name="save" value="${_('Save')}" />
+         </div>
+       </fieldset>
+     </form>
+@@ -121,7 +126,7 @@
+           </label>
+         </div>
+         <div class="buttons">
+-          <input type="submit" name="add" value="Add" />
++          <input type="submit" name="add" value="${_('Add')}" />
+         </div>
+       </fieldset>
+     </form>
+@@ -168,8 +173,8 @@
+           </tbody>
+         </table>
+         <div class="buttons">
+-          <input type="submit" name="remove" value="Remove selected items" />
+-          <input type="submit" name="apply" value="Apply changes" />
++          <input type="submit" name="remove" value="${_('Remove selected items')}" />
++          <input type="submit" name="apply" value="${_('Apply changes')}" />
+         </div>
+       </form>
+     </div>
+Index: customfieldadmin/customfieldadmin.py
+===================================================================
+--- customfieldadmin/customfieldadmin.py	(revision 9160)
++++ customfieldadmin/customfieldadmin.py	(working copy)
+@@ -12,7 +12,7 @@
+ from trac.core import *
+ from trac.web.chrome import ITemplateProvider, add_stylesheet, add_script
+ from trac.admin.api import IAdminPanelProvider
+-from api import CustomFields
++from api import CustomFields, _
+ 
+ 
+ class CustomFieldAdminPage(Component):
+@@ -27,7 +27,8 @@
+     
+     def get_admin_panels(self, req):
+         if 'TICKET_ADMIN' in req.perm:
+-            yield ('ticket', 'Ticket System', 'customfields', 'Custom Fields') 
++            yield ('ticket', _('Ticket System'),
++                   'customfields', _('Custom Fields')) 
+ 
+     def render_admin_panel(self, req, cat, page, customfield):
+         req.perm.require('TICKET_ADMIN')
+@@ -53,7 +54,7 @@
+         if customfield:
+             exists = [True for cf in cfapi.get_custom_fields() if cf['name'] == customfield]
+             if not exists:
+-                raise TracError("Custom field %s does not exist." % customfield)
++                raise TracError(_("Custom field %s does not exist.") % customfield)
+             if req.method == 'POST':
+                 if req.args.get('save'):
+                     cfdict = _customfield_from_req(self, req) 
+@@ -82,7 +83,7 @@
+                     sel = req.args.get('sel')
+                     sel = isinstance(sel, list) and sel or [sel]
+                     if not sel:
+-                        raise TracError, 'No custom field selected'
++                        raise TracError, _('No custom field selected')
+                     for name in sel:
+                         cfdict =  {'name': name}
+                         cfapi.delete_custom_field(cfdict)
+Index: setup.py
+===================================================================
+--- setup.py	(revision 9160)
++++ setup.py	(working copy)
+@@ -1,5 +1,19 @@
+ from setuptools import setup
+ 
++extra = {}
++
++from trac.util.dist  import  get_l10n_cmdclass
++cmdclass = get_l10n_cmdclass()
++if cmdclass:
++    extra['cmdclass'] = cmdclass
++    extractors = [
++        ('**.py',                'python', None),
++        ('**/templates/**.html', 'genshi', None),
++    ]
++    extra['message_extractors'] = {
++        'customfieldadmin': extractors,
++    }
++
+ setup(name='TracCustomFieldAdmin',
+       version='0.2.5',
+       packages=['customfieldadmin'],
+@@ -10,5 +24,10 @@
+       entry_points={'trac.plugins': [
+             'customfieldadmin.api = customfieldadmin.api',
+             'customfieldadmin.customfieldadmin = customfieldadmin.customfieldadmin']},
+-      package_data={'customfieldadmin' : ['htdocs/css/*.css','htdocs/js/*.js', 'templates/*.html', ]},
+-      install_requires = [])
++      package_data={'customfieldadmin' : ['htdocs/css/*.css',
++					  'htdocs/js/*.js',
++					  'templates/*.html', 
++					  'locale/*/LC_MESSAGES/*.mo',]},
++      install_requires = [],
++      **extra
++)
+Index: setup.cfg
+===================================================================
+--- setup.cfg	(revision 0)
++++ setup.cfg	(revision 0)
+@@ -0,0 +1,19 @@
++[extract_messages]
++add_comments = TRANSLATOR:
++output_file = customfieldadmin/locale/messages.pot
++keywords = _
++width = 72
++
++[init_catalog]
++input_file = customfieldadmin/locale/messages.pot
++output_dir = customfieldadmin/locale
++domain = customfieldadmin
++
++[compile_catalog]
++directory = customfieldadmin/locale
++domain = customfieldadmin
++
++[update_catalog]
++input_file = customfieldadmin/locale/messages.pot
++output_dir = customfieldadmin/locale
++domain = customfieldadmin
