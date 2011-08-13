@@ -13,8 +13,3 @@ DESCRIPTION="Content negotiation plugin for Trac wiki page"
 HOMEPAGE="http://trac-hacks.org/wiki/TracWikiNegotiatorPlugin"
 
 KEYWORDS="~x86 ~x86-fbsd"
-
-src_prepare() {
-	epatch "${FILESDIR}"/fix-import.patch
-	sed -i -e 's|data_files=.*||g' setup.py
-}
