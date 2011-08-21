@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
 
-EAPI="2"
 TRAC_VERSION=trunk
 
 inherit trac
@@ -13,5 +12,5 @@ HOMEPAGE="http://trac-hacks.org/wiki/AnnouncerPlugin"
 KEYWORDS="~x86 ~x86-fbsd"
 
 src_prepare() {
-	"${python}" setup.py compile_catalog -f
+	"$(PYTHON)" setup.py compile_catalog -f
 }
