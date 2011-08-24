@@ -1,4 +1,4 @@
-# Copyright 2009-2010 Gentoo Foundation
+# Copyright 2009-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
 
@@ -14,6 +14,5 @@ HOMEPAGE="http://trac-hacks.org/wiki/AnnouncerPlugin"
 KEYWORDS="~x86 ~x86-fbsd"
 
 src_prepare() {
-	epatch "${FILESDIR}"/correct-date-header.patch
 	"$(PYTHON)" setup.py compile_catalog -f
 }
