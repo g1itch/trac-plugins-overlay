@@ -1,4 +1,4 @@
-# Copyright 2009-2010 Gentoo Foundation
+# Copyright 2009-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
 
@@ -13,5 +13,11 @@ HOMEPAGE="http://trac-hacks.org/wiki/AnnouncerPlugin"
 KEYWORDS="~x86 ~x86-fbsd"
 
 src_prepare() {
+	#8620 on track-hacks.org
+	epatch "${FILESDIR}"/resolution-from.patch
+	#7791 on track-hacks.org
+	epatch "${FILESDIR}"/text-part-encoding.patch
+	#8310 on track-hacks.org
+	#epatch "${FILESDIR}"/email-references-for-threading.patch
 	"$(PYTHON)" setup.py compile_catalog -f
 }
