@@ -1,4 +1,4 @@
-# Copyright 2009-2011 Gentoo Foundation
+# Copyright 2009-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
 
@@ -23,8 +23,6 @@
 
 [ -z ${ESVN_REPO_URI} ] && \
 ESVN_REPO_URI="http://trac-hacks.org/svn/${MY_PN}${ADDON_TYPE}/${TRAC_VERSION}"
-
-EAPI=3
 
 inherit distutils subversion
 

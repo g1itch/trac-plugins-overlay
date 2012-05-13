@@ -1,6 +1,8 @@
-# Copyright 2009-2011 Gentoo Foundation
+# Copyright 2009-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
+
+EAPI=4
 
 TRAC_VERSION=trunk
 
