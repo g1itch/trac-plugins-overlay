@@ -24,6 +24,8 @@
 [ -z ${ESVN_REPO_URI} ] && \
 ESVN_REPO_URI="http://trac-hacks.org/svn/${MY_PN}${ADDON_TYPE}/${TRAC_VERSION}"
 
+PYTHON_COMPAT=( python{2_6,2_7} )
+
 inherit distutils-r1 subversion
 
 LICENSE="BSD"
