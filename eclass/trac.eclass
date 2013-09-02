@@ -1,4 +1,4 @@
-# Copyright 2009-2012 Gentoo Foundation
+# Copyright 2009-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
 
@@ -24,14 +24,14 @@
 [ -z ${ESVN_REPO_URI} ] && \
 ESVN_REPO_URI="http://trac-hacks.org/svn/${MY_PN}${ADDON_TYPE}/${TRAC_VERSION}"
 
-inherit distutils subversion
+inherit distutils-r1 subversion
 
 LICENSE="BSD"
 SLOT="0"
 IUSE=""
 
-if [ ${TRAC_VERSION} = 0.12 ] || [ ${TRAC_VERSION} = trunk ]; then
-	TRAC_EBUILD="trac-0.11.9999"
+if [ ${TRAC_VERSION} = trunk ]; then
+	TRAC_EBUILD="trac-1.0.1"
 else
 	TRAC_EBUILD="trac-${TRAC_VERSION}"
 fi
