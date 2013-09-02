@@ -13,3 +13,4 @@ DESCRIPTION="This wiki Syntax for EN and EM Dashes"
 HOMEPAGE="http://trac-hacks.org/wiki/DashesSyntaxPlugin"
 
 KEYWORDS="~x86 ~amd64 ~x86-fbsd"
+LICENSE="GPL-3"
