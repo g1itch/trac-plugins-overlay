@@ -3,15 +3,13 @@
 # $Header$
 
 EAPI=5
-PYTHON_COMPAT=( python{2_6,2_7} )
 
-TRAC_VERSION=1.0
+TRAC_VERSION=0.11
 ADDON_TYPE=macro
-MY_PN=${PN/-/}
 
 inherit trac
 
-DESCRIPTION="Image svg plugin for Trac."
-HOMEPAGE="http://trac-hacks.org/wiki/TracImageSvgMacro"
+DESCRIPTION="A Trac macro to limit access to parts of a page and attachments."
+HOMEPAGE="http://trac-hacks.org/wiki/ProtectedMacro"
 
 KEYWORDS="~x86 ~amd64 ~x86-fbsd"
