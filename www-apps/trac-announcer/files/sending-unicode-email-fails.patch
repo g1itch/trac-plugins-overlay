@@ -1,0 +1,24 @@
+Index: announcer/distributors/mail.py
+===================================================================
+--- announcer/distributors/mail.py	(revision 13940)
++++ announcer/distributors/mail.py	(working copy)
+@@ -478,7 +478,9 @@
+             rootMessage.attach(parentMessage)
+ 
+             alt_msg_format = 'html' in alternate_style and 'html' or 'plain'
+-            msgText = MIMEText(alternate_output, alt_msg_format)
++            msgText = MIMEText(alternate_output.encode(
++                self._charset.input_codec), alt_msg_format
++            )
+             msgText.set_charset(self._charset)
+             parentMessage.attach(msgText)
+         else:
+@@ -485,7 +487,7 @@
+             parentMessage = rootMessage
+ 
+         msg_format = 'html' in format and 'html' or 'plain'
+-        msgText = MIMEText(output, msg_format)
++        msgText = MIMEText(output.encode(self._charset.input_codec), msg_format)
+         del msgText['Content-Transfer-Encoding']
+         msgText.set_charset(self._charset)
+         # According to RFC 2046, the last part of a multipart message is best
